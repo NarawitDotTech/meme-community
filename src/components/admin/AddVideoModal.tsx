@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, Plus, Video, Upload, Youtube, CheckCircle2, Film } from "lucide-react";
 import { LearningVideo } from "@/lib/data/mock-data";
+import { saveClientCustomVideo } from "@/lib/data/client-cache";
 
 interface AddVideoModalProps {
   isOpen: boolean;
@@ -66,8 +67,27 @@ export default function AddVideoModal({ isOpen, onClose, onVideoAdded }: AddVide
       });
 
       const data = await res.json();
-      if (data.data && onVideoAdded) {
-        onVideoAdded(data.data);
+      const finalVideo: LearningVideo = data.data || {
+        id: `vid-${Date.now()}`,
+        title: payload.title,
+        description: payload.description,
+        category: payload.category,
+        level: payload.level,
+        duration: payload.duration,
+        module_code: payload.module_code,
+        status: payload.status,
+        views: "0",
+        video_url: payload.video_url,
+        thumbnail_url: payload.thumbnail_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuD8w0BosXmsRwR_S1Mho4YSomt_wWLfNbuMumLzgzLKq6hpLZARGnbBCrNk9ZQQzpC2kFS7puH8_KF3iR9_EOo449XXpY4DtAAXNRioyGDLRGn1hsUcnZyul7XpP5-jl1SAS0TCXzw9K_keWVzDoLjoi1q-EQgduyi5vUkcXfJWU1WlRzRg-Na3B9wXycKgg5oyZbaXXTl4NsSkgaRvImOXlDJSmyudQ5TwhXlB4dakSwJdamqRHN2QHg",
+        instructor_name: "Memeology Dept.",
+        instructor_subscribers: "1.2M Scholars",
+        instructor_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBelj7BrJI8cTV1RQfXWPDdnAfP4lGYfs5Y0kks60GBMNLhCdyCyaWnsE-f6GA8s9hLezKiU6um7NNQWzn7nBj_WXH28wBMIlZYIVLFKKfIoj7IVYO_zyM4MbTKhxRW7spnNUtd3p8aNA1FtKJVwioNIFBSb_ykel-mDi0PNhp9CgdBMCl8HARsYV-bABqHnXwtjtVMle3mjkGP8EEUSYFCdYtLbfJzxIKxcJ2x-NxVKAZDjOig6HD7OA",
+        created_at: new Date().toISOString().split("T")[0],
+      };
+
+      saveClientCustomVideo(finalVideo);
+      if (onVideoAdded) {
+        onVideoAdded(finalVideo);
       }
       onClose();
     } catch (err) {

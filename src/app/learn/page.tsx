@@ -4,20 +4,28 @@ import React, { useState, useEffect } from "react";
 import { INITIAL_VIDEOS, LearningVideo } from "@/lib/data/mock-data";
 import VideoPlayerModal from "@/components/learn/VideoPlayerModal";
 import AILessonGeneratorModal from "@/components/learn/AILessonGeneratorModal";
-import { Search, Play, Bot, Sparkles, Filter, BookOpen, Lock, LogIn, UserPlus } from "lucide-react";
+import { Search, Play, Bot, Sparkles, Filter, BookOpen, Lock, LogIn, UserPlus, Plus, Video } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+
+import { filterActiveVideos } from "@/lib/data/client-cache";
+import AddVideoModal from "@/components/admin/AddVideoModal";
 
 const CATEGORIES = ["All Courses", "Slang", "Memes", "Culture", "Foundations"];
 
 export default function LearningCenterPage() {
   const { user } = useAuth();
-  const [videos, setVideos] = useState<LearningVideo[]>(INITIAL_VIDEOS);
+  const [videos, setVideos] = useState<LearningVideo[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All Courses");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedVideo, setSelectedVideo] = useState<LearningVideo | null>(null);
   const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState<boolean>(false);
+  const [isAddVideoOpen, setIsAddVideoOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setVideos(filterActiveVideos(INITIAL_VIDEOS));
+  }, []);
 
   const fetchVideos = async () => {
     setIsLoading(true);
@@ -36,10 +44,11 @@ export default function LearningCenterPage() {
       });
       const data = await res.json();
       if (data.data) {
-        setVideos(data.data);
+        setVideos(filterActiveVideos(data.data));
       }
     } catch (e) {
       console.warn("Failed to fetch videos from API:", e);
+      setVideos(filterActiveVideos(INITIAL_VIDEOS));
     } finally {
       setIsLoading(false);
     }
@@ -48,6 +57,8 @@ export default function LearningCenterPage() {
   useEffect(() => {
     fetchVideos();
   }, [activeCategory, searchQuery]);
+
+  const canManageVideos = user?.role === "educator" || user?.role === "admin";
 
   return (
     <div className="relative w-full min-h-screen">
@@ -98,7 +109,7 @@ export default function LearningCenterPage() {
             <p className="font-body-lg text-sm md:text-base text-on-surface-variant max-w-xl leading-relaxed">
               Master the nuances of digital culture, dissect trending formats, and become fluent in modern memeology to create empathetic, highly-engaging classrooms.
             </p>
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setIsAIGeneratorOpen(true)}
                 className="bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs md:text-sm px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 glow-hover transition-all active:scale-95"
@@ -106,6 +117,16 @@ export default function LearningCenterPage() {
                 <Bot className="w-4 h-4" />
                 Launch AI Lesson Generator
               </button>
+
+              {canManageVideos && (
+                <button
+                  onClick={() => setIsAddVideoOpen(true)}
+                  className="bg-surface-container-lowest border border-outline-variant hover:border-primary text-on-surface font-bold text-xs md:text-sm px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all active:scale-95"
+                >
+                  <Plus className="w-4 h-4 text-primary" />
+                  Add Video Module
+                </button>
+              )}
             </div>
           </div>
 
@@ -245,6 +266,18 @@ export default function LearningCenterPage() {
           <AILessonGeneratorModal
             isOpen={isAIGeneratorOpen}
             onClose={() => setIsAIGeneratorOpen(false)}
+          />
+        )}
+
+        {/* Add Video Module Modal */}
+        {isAddVideoOpen && (
+          <AddVideoModal
+            isOpen={isAddVideoOpen}
+            onClose={() => setIsAddVideoOpen(false)}
+            onVideoAdded={(newVideo) => {
+              setVideos((prev) => [newVideo, ...prev.filter((v) => v.id !== newVideo.id)]);
+              fetchVideos();
+            }}
           />
         )}
       </div>

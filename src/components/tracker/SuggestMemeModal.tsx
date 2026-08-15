@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, Sparkles, RefreshCw, Layers, CheckCircle, AlertTriangle } from "lucide-react";
 import { MemeTrend } from "@/lib/data/mock-data";
+import { saveClientCustomTrend } from "@/lib/data/client-cache";
 
 interface SuggestMemeModalProps {
   isOpen: boolean;
@@ -82,9 +83,26 @@ export default function SuggestMemeModal({
       });
       const saveData = await saveRes.json();
 
+      const finalTrend: MemeTrend = saveData.data || {
+        id: `trend-${Date.now()}`,
+        title: memePayload.title,
+        description: memePayload.description,
+        category: memePayload.category,
+        trend_status: memePayload.trend_status,
+        image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBuDg_HiECfLPYtI7JjUxN0mLnczGreCwu_t88pCijTYlkt1MSTVmm2hJfSlUBAP2YM2Dx4gwq4BVUSfVVKlW34B6tFqcT0rNzrbwXNLtCZK4yphDVwQoj3_T9ovxxKrKTzoo1gdK7Wd-Wz760bylciO2-IE_CVQ5_q0V_7aNx7TwONpvRR5R92BVDxZ_01q3LTPWmhJKxWeHijYVDdmHydjQ_iyD4h48dUq7vHsj8ZouihltMftETXRg",
+        origin: memePayload.origin,
+        slang_terms: memePayload.slang_terms,
+        cultural_context: memePayload.cultural_context,
+        teacher_tips: memePayload.teacher_tips,
+        student_notes: memePayload.student_notes,
+        is_ai_explained: true,
+        created_at: new Date().toISOString().split("T")[0],
+      };
+
+      saveClientCustomTrend(finalTrend);
       setResult(analysis);
-      if (onMemeAnalyzed && saveData.data) {
-        onMemeAnalyzed(saveData.data);
+      if (onMemeAnalyzed) {
+        onMemeAnalyzed(finalTrend);
       }
     } catch (err) {
       console.error("Meme suggestion analysis error:", err);

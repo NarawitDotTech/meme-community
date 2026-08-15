@@ -8,12 +8,18 @@ import { Sparkles, ArrowRight, TrendingUp, Layers, RefreshCw, Lock, LogIn, UserP
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
+import { filterActiveTrends } from "@/lib/data/client-cache";
+
 export default function MemeTrackerPage() {
   const { user } = useAuth();
-  const [trends, setTrends] = useState<MemeTrend[]>(INITIAL_MEME_TRENDS);
+  const [trends, setTrends] = useState<MemeTrend[]>([]);
   const [selectedMeme, setSelectedMeme] = useState<MemeTrend | null>(null);
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTrends(filterActiveTrends(INITIAL_MEME_TRENDS));
+  }, []);
 
   const fetchTrends = async () => {
     setIsLoading(true);
@@ -24,10 +30,11 @@ export default function MemeTrackerPage() {
       });
       const data = await res.json();
       if (data.data && Array.isArray(data.data)) {
-        setTrends(data.data);
+        setTrends(filterActiveTrends(data.data));
       }
     } catch (e) {
       console.warn("Meme tracker fetch error:", e);
+      setTrends(filterActiveTrends(INITIAL_MEME_TRENDS));
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +186,8 @@ export default function MemeTrackerPage() {
           <SuggestMemeModal
             isOpen={isSuggestModalOpen}
             onClose={() => setIsSuggestModalOpen(false)}
-            onMemeAnalyzed={() => {
+            onMemeAnalyzed={(newMeme) => {
+              setTrends((prev) => [newMeme, ...prev.filter((t) => t.id !== newMeme.id)]);
               fetchTrends();
             }}
           />
