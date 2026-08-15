@@ -59,6 +59,9 @@ export async function GET(req: NextRequest) {
       }
     }
     const cleanFollowList = followingList.map((h) => h.toLowerCase().trim());
+    if (userHandleParam) {
+      cleanFollowList.push(userHandleParam.toLowerCase().trim());
+    }
     filtered = filtered.filter(
       (p) =>
         p.is_following_author ||
@@ -78,14 +81,18 @@ export async function GET(req: NextRequest) {
     }
     filtered = filtered.filter((p) => p.is_bookmarked || savedList.includes(p.id));
   } else if (tab === "latest") {
-    // Reverse chronological order (latest created first)
-    filtered = [...filtered].reverse();
-  } else {
-    // "For You" - Pinned posts first, then engagement
+    // Newest posts first (already prepended at index 0)
     filtered.sort((a, b) => {
       if (a.is_pinned && !b.is_pinned) return -1;
       if (!a.is_pinned && b.is_pinned) return 1;
-      return (b.likes_count + b.comments_count * 3) - (a.likes_count + a.comments_count * 3);
+      return 0; // preserve newest-first insertion order
+    });
+  } else {
+    // "For You" - Pinned posts first, then newest/trending posts
+    filtered.sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1;
+      if (!a.is_pinned && b.is_pinned) return 1;
+      return 0; // preserve newest-first order so fresh posts appear right below pinned posts
     });
   }
 
