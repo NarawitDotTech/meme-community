@@ -35,6 +35,7 @@ import EditPostModal from "./EditPostModal";
 import RequestRemoveModal from "./RequestRemoveModal";
 import Link from "next/link";
 import { parseVideoSource } from "@/components/learn/VideoPlayerModal";
+import { markClientPostDeleted } from "@/lib/data/client-cache";
 
 interface PostCardProps {
   post: Post;
@@ -235,6 +236,9 @@ export default function PostCard({
     if (!confirm(confirmMsg)) return;
 
     try {
+      markClientPostDeleted(post.id);
+      if (onDeletePost) onDeletePost(post.id);
+
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -247,7 +251,6 @@ export default function PostCard({
       });
       const data = await res.json();
       if (res.ok) {
-        if (onDeletePost) onDeletePost(post.id);
         showToast("Post permanently removed.");
         window.dispatchEvent(new Event("posts-updated"));
       } else {

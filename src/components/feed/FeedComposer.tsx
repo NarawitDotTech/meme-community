@@ -17,6 +17,7 @@ import {
   Film,
   Upload,
 } from "lucide-react";
+import { saveClientCustomPost } from "@/lib/data/client-cache";
 
 interface FeedComposerProps {
   onPostCreated: () => void;
@@ -198,6 +199,10 @@ export default function FeedComposer({ onPostCreated }: FeedComposerProps) {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          saveClientCustomPost(data.data);
+        }
         setContent("");
         setImageUrl("");
         setVideoUrl("");

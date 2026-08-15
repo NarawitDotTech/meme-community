@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, Image as ImageIcon, Sparkles, Wand2, Tag, LogIn, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { saveClientCustomPost } from "@/lib/data/client-cache";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -97,6 +98,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
       });
 
       if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          saveClientCustomPost(data.data);
+        }
         setContent("");
         setImageUrl("");
         if (onPostCreated) onPostCreated();

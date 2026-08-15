@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { markClientPostDeleted } from "@/lib/data/client-cache";
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -152,6 +153,7 @@ export default function AdminDashboardPage() {
     if (!confirm(`Admin: Delete reported post?`)) return;
     try {
       if (report.post_id) {
+        markClientPostDeleted(report.post_id);
         await fetch("/api/posts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -226,6 +228,7 @@ export default function AdminDashboardPage() {
   const handleDeletePost = async (postId: string) => {
     if (!confirm("Admin Action: Delete this community post?")) return;
     try {
+      markClientPostDeleted(postId);
       await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

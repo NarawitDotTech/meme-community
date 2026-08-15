@@ -21,9 +21,11 @@ import {
   User,
 } from "lucide-react";
 
+import { filterActivePosts } from "@/lib/data/client-cache";
+
 export default function HomeFeedPage() {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [trendingTags, setTrendingTags] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"foryou" | "following" | "latest" | "saved">("foryou");
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -34,6 +36,11 @@ export default function HomeFeedPage() {
   // Profile modal state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [selectedProfileUser, setSelectedProfileUser] = useState<UserProfile | null>(null);
+
+  // Load client cache on initial mount
+  useEffect(() => {
+    setPosts(filterActivePosts(INITIAL_POSTS));
+  }, []);
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -65,13 +72,14 @@ export default function HomeFeedPage() {
       });
       const data = await res.json();
       if (data.data && Array.isArray(data.data)) {
-        setPosts(data.data);
+        setPosts(filterActivePosts(data.data));
       }
       if (data.trendingTags && Array.isArray(data.trendingTags)) {
         setTrendingTags(data.trendingTags);
       }
     } catch (e) {
       console.warn("Feed fetch fallback:", e);
+      setPosts(filterActivePosts(INITIAL_POSTS));
     } finally {
       setIsLoading(false);
     }
