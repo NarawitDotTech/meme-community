@@ -437,7 +437,9 @@ export default function PostCard({
                 {post.author_name}
               </span>
               {post.is_verified && (
-                <BadgeCheck className="w-4 h-4 text-primary shrink-0" title="Verified Scholar" />
+                <span title="Verified Scholar" className="inline-flex items-center">
+                  <BadgeCheck className="w-4 h-4 text-primary shrink-0" />
+                </span>
               )}
               <span
                 className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${

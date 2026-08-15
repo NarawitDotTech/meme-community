@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { INITIAL_USERS, UserProfile } from "@/lib/data/mock-data";
+import { UserProfile } from "@/lib/data/mock-data";
+import { getUsers, saveUsers } from "@/lib/data/storage";
 import { supabaseAdmin } from "@/lib/supabase/server";
-
-let usersStore: UserProfile[] = [...INITIAL_USERS];
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -10,40 +9,44 @@ export async function GET(req: NextRequest) {
   const username = searchParams.get("username");
   const id = searchParams.get("id");
 
+  const users = getUsers();
+
   if (id) {
-    const user = usersStore.find((u) => u.id === id);
+    const user = users.find((u) => u.id === id);
     return NextResponse.json({ success: true, data: user || null });
   }
 
   if (email) {
-    const user = usersStore.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
     return NextResponse.json({ success: true, data: user || null });
   }
 
   if (username) {
-    const user = usersStore.find((u) => u.username.toLowerCase() === username.toLowerCase());
+    const user = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
     return NextResponse.json({ success: true, data: user || null });
   }
 
-  return NextResponse.json({ success: true, data: usersStore });
+  return NextResponse.json({ success: true, data: users });
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action, profile } = body;
+    let users = getUsers();
 
     if (action === "sync_user" && profile) {
-      const existingIdx = usersStore.findIndex(
+      const existingIdx = users.findIndex(
         (u) => u.id === profile.id || u.email.toLowerCase() === profile.email.toLowerCase()
       );
 
       if (existingIdx >= 0) {
-        usersStore[existingIdx] = {
-          ...usersStore[existingIdx],
+        users[existingIdx] = {
+          ...users[existingIdx],
           ...profile,
         };
-        return NextResponse.json({ success: true, data: usersStore[existingIdx] });
+        saveUsers(users);
+        return NextResponse.json({ success: true, data: users[existingIdx] });
       } else {
         const newUser: UserProfile = {
           id: profile.id || `u-${Date.now()}`,
@@ -65,7 +68,8 @@ export async function POST(req: NextRequest) {
           liked_post_ids: [],
           created_at: new Date().toISOString(),
         };
-        usersStore = [newUser, ...usersStore];
+        users = [newUser, ...users];
+        saveUsers(users);
         return NextResponse.json({ success: true, data: newUser });
       }
     }
