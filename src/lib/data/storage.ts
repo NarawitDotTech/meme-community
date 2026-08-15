@@ -24,41 +24,39 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const BUCKET_NAME = "app-data";
 const DATA_DIR = path.join(process.cwd(), "data");
 
-// In-memory cache for ultra-fast serverless response
-const memoryCache: { [filename: string]: any } = {};
-
 function ensureDataDir() {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
   } catch (e) {
-    // Read-only filesystem on serverless environments
+    // Serverless read-only environment
   }
 }
 
-// 1. CLOUD READ
+// 1. CLOUD READ WITH COMPLETE CACHE BUSTING
 async function readCloudJson<T>(filename: string, fallback: T): Promise<T> {
   try {
-    const { data, error } = await supabase.storage.from(BUCKET_NAME).download(filename);
-    if (data && !error) {
-      const text = await data.text();
-      const parsed = JSON.parse(text) as T;
-      memoryCache[filename] = parsed;
-      // Also try writing to local disk cache if writable
+    const { data: { publicUrl } } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filename);
+    const response = await fetch(`${publicUrl}?_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
+    });
+
+    if (response.ok) {
+      const parsed = await response.json() as T;
+      // Also cache to local disk if environment is writable
       try {
         ensureDataDir();
-        fs.writeFileSync(path.join(DATA_DIR, filename), text, "utf-8");
+        fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(parsed, null, 2), "utf-8");
       } catch (e) {}
       return parsed;
     }
   } catch (err) {
-    console.warn(`[CloudStorage] Error fetching ${filename} from Supabase:`, err);
-  }
-
-  // Fallback to memory cache
-  if (memoryCache[filename]) {
-    return memoryCache[filename];
+    console.warn(`[CloudStorage] Read error for ${filename}, attempting fallback:`, err);
   }
 
   // Fallback to local file if available
@@ -66,18 +64,15 @@ async function readCloudJson<T>(filename: string, fallback: T): Promise<T> {
     const filePath = path.join(DATA_DIR, filename);
     if (fs.existsSync(filePath)) {
       const localData = fs.readFileSync(filePath, "utf-8");
-      const parsed = JSON.parse(localData) as T;
-      memoryCache[filename] = parsed;
-      return parsed;
+      return JSON.parse(localData) as T;
     }
   } catch (e) {}
 
   return fallback;
 }
 
-// 2. CLOUD WRITE
+// 2. CLOUD WRITE WITH 0 CACHE-CONTROL
 async function writeCloudJson<T>(filename: string, data: T): Promise<void> {
-  memoryCache[filename] = data;
   const jsonString = JSON.stringify(data, null, 2);
 
   // Write to local disk if writable
@@ -86,21 +81,21 @@ async function writeCloudJson<T>(filename: string, data: T): Promise<void> {
     fs.writeFileSync(path.join(DATA_DIR, filename), jsonString, "utf-8");
   } catch (e) {}
 
-  // Upload to Supabase Cloud Storage bucket
+  // Upload to Supabase Cloud Storage bucket with cacheControl = 0
   try {
     const buffer = Buffer.from(jsonString, "utf-8");
     await supabase.storage.from(BUCKET_NAME).upload(filename, buffer, {
       upsert: true,
       contentType: "application/json",
+      cacheControl: "0",
     });
   } catch (err) {
-    console.error(`[CloudStorage] Error uploading ${filename} to Supabase:`, err);
+    console.error(`[CloudStorage] Write error for ${filename} to Supabase:`, err);
   }
 }
 
 // Synchronous local helpers
 function readJsonFile<T>(filename: string, fallback: T): T {
-  if (memoryCache[filename]) return memoryCache[filename];
   ensureDataDir();
   const filePath = path.join(DATA_DIR, filename);
   try {
@@ -109,22 +104,18 @@ function readJsonFile<T>(filename: string, fallback: T): T {
       return fallback;
     }
     const data = fs.readFileSync(filePath, "utf-8");
-    const parsed = JSON.parse(data) as T;
-    memoryCache[filename] = parsed;
-    return parsed;
+    return JSON.parse(data) as T;
   } catch (err) {
     return fallback;
   }
 }
 
 function writeJsonFile<T>(filename: string, data: T) {
-  memoryCache[filename] = data;
   ensureDataDir();
   const filePath = path.join(DATA_DIR, filename);
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {}
-  // Also asynchronously trigger cloud upload
   writeCloudJson(filename, data).catch((e) => console.warn(e));
 }
 

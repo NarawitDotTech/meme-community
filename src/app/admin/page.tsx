@@ -68,10 +68,10 @@ export default function AdminDashboardPage() {
   const fetchAdminData = async () => {
     try {
       const [vRes, rRes, uRes, pRes] = await Promise.all([
-        fetch("/api/videos"),
-        fetch("/api/memes?type=reports"),
-        fetch("/api/admin/users"),
-        fetch("/api/posts?tab=latest"),
+        fetch(`/api/videos?_t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache, no-store, must-revalidate" } }),
+        fetch(`/api/memes?type=reports&_t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache, no-store, must-revalidate" } }),
+        fetch(`/api/admin/users?_t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache, no-store, must-revalidate" } }),
+        fetch(`/api/posts?tab=latest&_t=${Date.now()}`, { cache: "no-store", headers: { "Cache-Control": "no-cache, no-store, must-revalidate" } }),
       ]);
       const vData = await vRes.json();
       const rData = await rRes.json();

@@ -1,0 +1,110 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = 'https://gegewgrpmqhnhutasjby.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZ2V3Z3JwbXFobmh1dGFzamJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njc4NjY2NiwiZXhwIjoyMTAyMzYyNjY2fQ.t1xUu_hWfiZ_Z_bQdzOQo9D_Zs10kTr38ab8mT9CEFk';
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+const CLEAN_POSTS = [
+  {
+    id: "post-welcome-1",
+    author_id: "u-1",
+    author_name: "Dr. Memeology",
+    author_handle: "@philosopher_king",
+    author_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw",
+    author_role: "educator",
+    author_bio: "Professor of Digital Media & Memetic Philosophy. Bridging academic rigor and internet culture.",
+    author_followers: 1420,
+    is_following_author: true,
+    is_verified: true,
+    is_pinned: true,
+    content: "Welcome to Meme Community! 🎉\n\nThis platform connects students and educators through shared meme literacy. Feel free to post memes, vote on polls, and use the AI Slang Decoder to decode modern internet slang for classroom contexts.",
+    image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCUgayW8eGcEd3NHbwVDlpECrSayVBvT-Pdpt9TvK7G1co-SDiYXyUXDVRbpknx0WlLx0HpTvkgpFeh_jqpvvUQwhyMSFFMMUB6SRL0rfWvTGK3jCiR_40n-_R1BELylLXllQA_1oWkN3defrhCUKnenMtp-aFufHV0BFoMKgWy6tXGjNM8ZYCBujml-NWY_HaPze2IOTblCf78qOp7awb58St1NLDNI-jxHZSvQYWNMJNsPVjIjXakKQ",
+    category: "Philosophy",
+    slang_tags: [
+      "Welcome",
+      "MemeTheory",
+      "Classroom",
+      "DigitalLiteracy"
+    ],
+    slang_breakdown: [
+      {
+        "term": "Meme Literacy",
+        "definition": "The ability to critically understand, interpret, and contextualize viral internet formats.",
+        "for_teachers": "Use as a tool for teaching satire, rhetoric, and media analysis."
+      }
+    ],
+    poll: {
+      id: "poll-welcome",
+      question: "Teachers: How often do you encounter slang in homework or class discussions?",
+      options: [
+        { id: "opt-1", text: "Every single day (Rizz, No Cap, Brainrot)", votes: 34 },
+        { id: "opt-2", text: "A few times a week", votes: 21 },
+        { id: "opt-3", text: "Rarely / Only in hallways", votes: 8 },
+        { id: "opt-4", text: "I speak fluent slang myself 😎", votes: 15 }
+      ],
+      total_votes: 78
+    },
+    likes_count: 58,
+    comments_count: 1,
+    shares_count: 12,
+    bookmarks_count: 9,
+    created_at: "Just now",
+    is_liked: false,
+    is_bookmarked: false,
+    is_reposted: false,
+    comments: [
+      {
+        id: "c-welcome-1",
+        post_id: "post-welcome-1",
+        author_name: "Alex",
+        author_handle: "@anon_lurker",
+        author_role: "student",
+        author_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQG5761Gj_1MBYEKsKmG6v1l_xubjpj9-wE-L_U49q7dJp68cPrsiRYMTcguMQzVazkkZ3QTvf3_IL4xj7S4P28uti0ZlZ5FbKzLIGVQiDzEq_91prMzWLNu1LsluA4mtcFAf3xMoM7VVqIfT1bYEXSv89DnIcgjUdvkogngcj1SohZyr9VZqUxibTMxaAljSxN_AoXHG6BTL3K7dvupXfRiZvBaINxwz5fLz5_lyLvyjE5W98E3IYKw",
+        content: "Excited to share our study group memes here!",
+        likes_count: 4,
+        is_liked: false,
+        created_at: "Just now"
+      }
+    ]
+  },
+  {
+    id: "post-admin-announcement",
+    author_id: "u-admin-main",
+    author_name: "Super Admin",
+    author_handle: "@admin",
+    author_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCJnTEL7t8O_0vf0JSgEv4BnefcIoBxRj6srJ5dq71TVWwvNVmn94lh2dvrc64-W18HWQSI19OmhkaTCkn-dUVERt2u8lJqakIGuLqUQ41VZzzfzMCR5s9eS98NVLITrXngEuU1k4XFJlFSB9u965hFpw_FMejbEDD4Cd8YLSCiXNZNymA7j2exZxOPIptjBvbF7FRZsYX7Hw6sMW_NGSWpdt0tZfLRsj7_MJJUFIoXmmosfgKUtYZYAw",
+    author_role: "admin",
+    author_bio: "Head Administrator & Platform Director for Meme Community.",
+    author_followers: 5000,
+    is_following_author: true,
+    is_verified: true,
+    content: "System Update: The Learn Hub has been upgraded with YouTube embeds and HTML5 MP4 video uploads! Check out the Video Curriculum in the Learn Hub above.",
+    category: "Tech",
+    slang_tags: [
+      "Tech",
+      "Classroom",
+      "MemeTheory"
+    ],
+    likes_count: 24,
+    comments_count: 0,
+    shares_count: 5,
+    bookmarks_count: 3,
+    created_at: "Just now",
+    is_liked: false,
+    is_bookmarked: false,
+    is_reposted: false,
+    comments: []
+  }
+];
+
+async function resetCloudPosts() {
+  const { data, error } = await supabase.storage.from('app-data').upload('posts.json', Buffer.from(JSON.stringify(CLEAN_POSTS, null, 2)), {
+    upsert: true,
+    contentType: 'application/json',
+    cacheControl: '0'
+  });
+  console.log('Reset cloud posts:', { path: data?.path, error });
+}
+
+resetCloudPosts();

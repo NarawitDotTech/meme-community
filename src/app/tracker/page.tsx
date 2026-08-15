@@ -18,7 +18,10 @@ export default function MemeTrackerPage() {
   const fetchTrends = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/memes");
+      const res = await fetch(`/api/memes?_t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      });
       const data = await res.json();
       if (data.data && Array.isArray(data.data)) {
         setTrends(data.data);

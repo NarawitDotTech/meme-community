@@ -26,7 +26,14 @@ export default function LearningCenterPage() {
       if (activeCategory !== "All Courses") url.searchParams.set("category", activeCategory);
       if (searchQuery) url.searchParams.set("search", searchQuery);
 
-      const res = await fetch(url.toString());
+      url.searchParams.set("_t", Date.now().toString());
+
+      const res = await fetch(url.toString(), {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      });
       const data = await res.json();
       if (data.data) {
         setVideos(data.data);

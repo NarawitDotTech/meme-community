@@ -54,7 +54,15 @@ export default function HomeFeedPage() {
         url.searchParams.set("bookmarked_ids", JSON.stringify(user.bookmarked_post_ids));
       }
 
-      const res = await fetch(url.toString());
+      url.searchParams.set("_t", Date.now().toString());
+
+      const res = await fetch(url.toString(), {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       const data = await res.json();
       if (data.data && Array.isArray(data.data)) {
         setPosts(data.data);
