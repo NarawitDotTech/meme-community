@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "",
 });
@@ -16,6 +19,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!process.env.OPENAI_API_KEY) {
+      // Mocked intelligent fallback response if OpenAI API key is not configured
+      const title = query.length > 25 ? `${query.slice(0, 25)}...` : query;
+      return NextResponse.json({
+        success: true,
+        data: {
+          title,
+          category: "Digital Slang & Culture",
+          origin: "Originated in online student communities and viral discourse.",
+          slang_terms: [query.split(" ")[0] || "Slang", "Context", "Meme"],
+          cultural_context: `"${query}" is widely used in modern internet conversations to express relatable student experiences, irony, or digital identity.`,
+          teacher_tips: `Use "${query}" as an icebreaker or bridge to explore linguistic evolution and modern rhetoric in the classroom.`,
+          student_notes: `Safe and relatable when used in friendly banter; avoid using in exclusive or targeted contexts.`,
+        },
+      });
+    }
+
     const systemPrompt = `You are an expert socio-linguist and internet meme historian specializing in bridging the cultural communication gap between teachers/educators and Gen Z/Gen Alpha students.
 Analyze the provided meme, internet trend, or slang phrase.
 
@@ -23,61 +43,43 @@ Return a strictly valid JSON object with the following schema:
 {
   "title": "Clean, descriptive name of the meme or slang",
   "category": "e.g. Slang & Vernacular, Pop Culture, Academic Humor, Tech Satire, Surrealism",
-  "trend_status": "Trending Up" | "Peaking" | "Niche Rising",
-  "description": "Comprehensive explanation (2-3 sentences) of what it means and how it is used.",
-  "origin": "Historical roots, first appearances (e.g., TikTok, Reddit, Twitch, anime), and timeline.",
-  "slang_terms": ["List", "of", "3-5", "related", "slang", "keywords"],
-  "cultural_context": "Deep dive into why students find it funny, relatable, or expressive of modern teenage experience.",
-  "teacher_tips": "Practical actionable guidance for teachers: how to recognize it in class, when it's benign vs disruptive, and how to relate to students without forcing it awkwardly.",
-  "student_notes": "Context for students on how to use it appropriately and avoid cringe/bullying.",
-  "appropriateness": "School Safe" | "Needs Context" | "Use Caution"
-}
+  "origin": "Brief history / where it emerged (e.g. TikTok, Twitch, Reddit, Classroom)",
+  "slang_terms": ["List", "of", "relevant", "keywords"],
+  "cultural_context": "Deep, intellectual yet accessible explanation of what it means and why it resonates.",
+  "teacher_tips": "Practical, actionable guidance for educators on how to interpret this in student work or classroom discussions without being 'cringe'.",
+  "student_notes": "How students can use this creatively without crossing into cyberbullying or exclusionary behavior."
+}`;
 
-Do NOT include any markdown code fences around the JSON. Output only the pure JSON string.`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: `Analyze this meme/slang query: "${query}"\nAdditional Context: ${context || "None provided"}`,
+        },
+      ],
+      temperature: 0.7,
+    });
 
-    const userPrompt = `Analyze this meme/slang: "${query}". Additional context provided: "${context || "None"}".`;
-
-    let aiResult;
-    try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" },
-      });
-
-      const responseText = completion.choices[0]?.message?.content || "{}";
-      aiResult = JSON.parse(responseText);
-    } catch (openaiErr: any) {
-      console.warn("OpenAI API call error, using smart fallback analysis:", openaiErr);
-      
-      // Smart dynamic fallback if OpenAI key has network/quota issues
-      const cleanQ = query.trim();
-      aiResult = {
-        title: cleanQ.charAt(0).toUpperCase() + cleanQ.slice(1),
-        category: "Slang & Digital Culture",
-        trend_status: "Trending Up",
-        description: `"${cleanQ}" is an internet culture phenomenon that blends irony, relatable humor, and rapid online dissemination among students.`,
-        origin: "Originates from short-form video platforms and peer-to-peer Discord communities.",
-        slang_terms: [cleanQ, "Vibe Check", "No Cap", "Core", "Brainrot"],
-        cultural_context: "Students use this phrase to express camaraderie, shared experiences, and shared cultural shorthand that distinguishes their digital identity.",
-        teacher_tips: "Acknowledge the term with light humor if heard in the hallway. Use it as a teachable moment for linguistics or media literacy, but avoid overusing it in formal lectures.",
-        student_notes: "Great in casual peer group chats; ensure classmates are not being excluded or targeted when using slang.",
-        appropriateness: "School Safe",
-      };
+    const rawContent = completion.choices[0]?.message?.content;
+    if (!rawContent) {
+      throw new Error("No response generated from OpenAI.");
     }
+
+    const parsed = JSON.parse(rawContent);
 
     return NextResponse.json({
       success: true,
-      data: aiResult,
+      data: parsed,
     });
   } catch (error: any) {
-    console.error("Meme explain API error:", error);
+    console.error("OpenAI Explain API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate meme analysis" },
+      {
+        error: error.message || "Failed to analyze meme.",
+      },
       { status: 500 }
     );
   }

@@ -1,32 +1,5 @@
 [
   {
-    "id": "post-1786815277299",
-    "author_name": "Super Admin",
-    "author_handle": "@admin",
-    "author_avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw",
-    "author_role": "admin",
-    "author_bio": "Student contributor.",
-    "author_followers": 10,
-    "is_following_author": false,
-    "is_verified": true,
-    "content": "Live Test Post: Testing refresh persistence!",
-    "category": "Culture",
-    "slang_tags": [
-      "LiveTest",
-      "Culture"
-    ],
-    "likes_count": 0,
-    "comments_count": 0,
-    "shares_count": 0,
-    "bookmarks_count": 0,
-    "created_at": "Just now",
-    "is_liked": false,
-    "is_bookmarked": false,
-    "is_reposted": false,
-    "is_pinned": false,
-    "comments": []
-  },
-  {
     "id": "post-welcome-1",
     "author_id": "u-1",
     "author_name": "Dr. Memeology",

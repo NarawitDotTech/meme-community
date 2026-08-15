@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "",
 });
@@ -16,6 +19,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!process.env.OPENAI_API_KEY) {
+      // Mocked intelligent lesson plan fallback if OpenAI key is not configured in Vercel env
+      return NextResponse.json({
+        success: true,
+        data: {
+          lesson_title: `Deconstructing ${topic} Through Modern Memes`,
+          learning_objective: `Students will analyze core principles of ${topic} (${subject || "General Studies"}) by evaluating rhetorical devices and satire in digital culture.`,
+          hook: `Show students a popular viral meme about ${topic} and ask them: "What underlying concept makes this joke work?"`,
+          core_concepts: [
+            {
+              concept_name: `Fundamentals of ${topic}`,
+              explanation: `Breaking down key terminology and foundational theory into relatable everyday metaphors.`,
+              meme_analogy: `Think of this concept like an algorithmic feedback loop: inputs dictate outcomes.`,
+            },
+            {
+              concept_name: "Rhetorical Media Analysis",
+              explanation: "Examining how visual formats communicate tone, bias, and humor.",
+              meme_analogy: "Comparing classical argumentation with modern image macro punchlines.",
+            },
+          ],
+          activity: {
+            title: `The ${topic} Meme Creation Lab`,
+            instructions: `In pairs, create a constructive meme that accurately explains ${topic} without using jargon.`,
+            deliverable: "1 original meme with a 3-sentence explanatory caption.",
+          },
+          discussion_prompts: [
+            `How does humor help us remember difficult concepts in ${topic}?`,
+            "Where is the boundary between healthy satire and misinformation in online learning?",
+          ],
+          formative_check: {
+            question: `Which of the following best represents the key idea of ${topic}?`,
+            options: [
+              "A simplified model of complex systems",
+              "A temporary viral trend with no academic value",
+              "An isolated theoretical formula",
+              "None of the above",
+            ],
+            correct_answer_index: 0,
+            explanation: `Memes and models both serve to distill complex underlying mechanisms into accessible mental representations.`,
+          },
+        },
+      });
+    }
+
     const systemPrompt = `You are an award-winning instructional designer and master educator who excels at using internet memes, relatable analogies, and pop culture to teach rigorous academic concepts without patronizing students.
 
 Return a strictly valid JSON object with the following schema:
@@ -23,103 +70,60 @@ Return a strictly valid JSON object with the following schema:
   "lesson_title": "Catchy, meme-infused lesson title",
   "learning_objective": "Clear educational standard/takeaway",
   "hook": "An engaging 30-second meme-based classroom opener or icebreaker",
-  "meme_analogy": "How the core academic concept maps directly onto a popular meme format",
-  "short_video_script": [
-    { "timestamp": "0:00 - 0:15", "visual": "Description of visual/meme slide", "script": "What the teacher says" },
-    { "timestamp": "0:15 - 0:45", "visual": "Description of visual/meme slide", "script": "What the teacher says" },
-    { "timestamp": "0:45 - 1:15", "visual": "Description of visual/meme slide", "script": "What the teacher says" },
-    { "timestamp": "1:15 - 1:30", "visual": "Description of visual/meme slide", "script": "Wrap-up and call to action" }
+  "core_concepts": [
+    {
+      "concept_name": "Name of concept",
+      "explanation": "Clear academic explanation",
+      "meme_analogy": "Relatable meme comparison"
+    }
   ],
-  "discussion_prompts": [
-    "Discussion question 1",
-    "Discussion question 2"
-  ],
-  "quick_check_quiz": {
-    "question": "A multiple-choice question testing the concept via meme context",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correct_answer": "Option B",
+  "activity": {
+    "title": "Interactive student activity name",
+    "instructions": "Step-by-step instructions for teachers",
+    "deliverable": "What students submit/produce"
+  },
+  "discussion_prompts": ["Prompt 1", "Prompt 2"],
+  "formative_check": {
+    "question": "A quick multiple choice question to check understanding",
+    "options": ["A", "B", "C", "D"],
+    "correct_answer_index": 0,
     "explanation": "Why this answer is correct"
   }
-}
+}`;
 
-Do NOT include markdown formatting or backticks around the JSON. Output only pure JSON string.`;
+    const userPrompt = `Generate a high-engagement educational lesson plan:
+- Academic Topic: ${topic}
+- Subject Domain: ${subject || "General Science & Humanities"}
+- Target Audience/Grade: ${targetGrade || "High School / Undergraduate"}
+- Meme Style / Vibe: ${memeStyle || "Smart Satire & Modern Slang"}`;
 
-    const userPrompt = `Create a meme-based lesson plan for:
-Subject: ${subject || "General"}
-Topic: ${topic}
-Target Grade: ${targetGrade || "High School (9-12)"}
-Meme Style / Slang to leverage: ${memeStyle || "Doge / Modern Post-Irony / Relatable Student Humor"}`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.7,
+    });
 
-    let lessonData;
-    try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" },
-      });
-
-      const responseText = completion.choices[0]?.message?.content || "{}";
-      lessonData = JSON.parse(responseText);
-    } catch (err) {
-      console.warn("OpenAI lesson generator fallback active:", err);
-      lessonData = {
-        lesson_title: `Mastering ${topic}: The Memetic Guide`,
-        learning_objective: `Understand the fundamental mechanics of ${topic} through high-retention visual frameworks.`,
-        hook: `Start the class displaying a split screen: on the left, a traditional textbook formula; on the right, a classic reaction meme labeled 'Me trying to comprehend ${topic}'.`,
-        meme_analogy: `${topic} functions like viral information cascades—inputs trigger high-energy reactions that transform state across the system.`,
-        short_video_script: [
-          {
-            timestamp: "0:00 - 0:15",
-            visual: "Teacher holds up a confused Shiba Inu meme placard.",
-            script: `Ever felt like ${topic} was speaking an alien language? Let's decode it in 60 seconds.`,
-          },
-          {
-            timestamp: "0:15 - 0:45",
-            visual: "Animated flowchart showing core components interacting with humorous captions.",
-            script: `Think of rule #1 as the primary catalyst. Without it, the whole equation runs into a syntax error!`,
-          },
-          {
-            timestamp: "0:45 - 1:15",
-            visual: "Before and After comparison meme showing wrong way vs right way.",
-            script: `Notice how balancing the variables prevents the whole structure from falling into the void.`,
-          },
-          {
-            timestamp: "1:15 - 1:30",
-            visual: "Verified checkmark sticker with classroom challenge question.",
-            script: `Now it's your turn: apply this rule on page 42 and let's see who gets maximum rizz on the quiz!`,
-          },
-        ],
-        discussion_prompts: [
-          `How does breaking ${topic} into humorous analogies change your intuitive understanding?`,
-          `Can you design your own meme template explaining this week's chapter?`,
-        ],
-        quick_check_quiz: {
-          question: `In the context of ${topic}, what is the primary role of the driving mechanism?`,
-          options: [
-            "A) It shuts down all active processes",
-            "B) It catalyzes and sustains the transformation cycle",
-            "C) It only operates under extreme pressure",
-            "D) It creates unnecessary friction",
-          ],
-          correct_answer: "B) It catalyzes and sustains the transformation cycle",
-          explanation:
-            "The driving mechanism acts as the engine that drives progression through each subsequent step of the system.",
-        },
-      };
+    const rawContent = completion.choices[0]?.message?.content;
+    if (!rawContent) {
+      throw new Error("No response generated from OpenAI.");
     }
+
+    const parsed = JSON.parse(rawContent);
 
     return NextResponse.json({
       success: true,
-      data: lessonData,
+      data: parsed,
     });
   } catch (error: any) {
-    console.error("Lesson generator error:", error);
+    console.error("OpenAI Lesson Generator API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate lesson" },
+      {
+        error: error.message || "Failed to generate lesson outline.",
+      },
       { status: 500 }
     );
   }
