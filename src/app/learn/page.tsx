@@ -11,7 +11,7 @@ import Link from "next/link";
 import { filterActiveVideos } from "@/lib/data/client-cache";
 import AddVideoModal from "@/components/admin/AddVideoModal";
 
-const CATEGORIES = ["All Courses", "Slang", "Memes", "Culture", "Foundations"];
+const CATEGORIES = ["All Courses", "Classroom", "Technology", "Memes", "Slang", "Culture", "Foundations"];
 
 export default function LearningCenterPage() {
   const { user } = useAuth();
