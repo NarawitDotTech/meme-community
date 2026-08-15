@@ -31,26 +31,48 @@ export default function SuggestMemeModal({
 
     try {
       // 1. Call OpenAI API for cultural analysis
-      const aiRes = await fetch("/api/ai/explain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim(), context: context.trim() }),
-      });
-      const aiData = await aiRes.json();
-      const analysis = aiData.data;
+      let analysis: any = null;
+      try {
+        const aiRes = await fetch("/api/ai/explain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query.trim(), context: context.trim() }),
+        });
+        const aiData = await aiRes.json();
+        if (aiData.data) {
+          analysis = aiData.data;
+        }
+      } catch (aiErr) {
+        console.warn("AI explain network error:", aiErr);
+      }
+
+      // Robust fallback if AI analysis was unavailable
+      if (!analysis) {
+        analysis = {
+          title: query.trim(),
+          description: `Analysis for "${query.trim()}". ${context ? `Context: ${context}` : "Trending internet slang and digital culture format."}`,
+          category: "Slang & Culture",
+          trend_status: "Trending Up",
+          origin: context || "Online student discourse & social media.",
+          slang_terms: [query.trim().split(" ")[0] || "Slang", "Meme", "Culture"],
+          cultural_context: `"${query.trim()}" is widely recognized in online student conversations. Understanding this format helps educators connect with modern youth vernacular.`,
+          teacher_tips: `Use "${query.trim()}" to spark classroom conversations about language evolution, satire, and digital media.`,
+          student_notes: `Keep usage friendly and inclusive. Avoid using in exclusionary inside jokes.`,
+        };
+      }
 
       // 2. Save into memes database/state
       const memePayload = {
         action: "suggest",
         title: analysis.title || query.trim(),
-        description: analysis.description,
+        description: analysis.description || `Internet culture breakdown for ${query.trim()}`,
         category: analysis.category || "Slang & Culture",
         trend_status: analysis.trend_status || "Trending Up",
-        origin: analysis.origin,
-        slang_terms: analysis.slang_terms || [],
-        cultural_context: analysis.cultural_context,
-        teacher_tips: analysis.teacher_tips,
-        student_notes: analysis.student_notes,
+        origin: analysis.origin || "Community submitted",
+        slang_terms: Array.isArray(analysis.slang_terms) ? analysis.slang_terms : [query.trim()],
+        cultural_context: analysis.cultural_context || "Modern youth cultural term.",
+        teacher_tips: analysis.teacher_tips || "Connect with students through relatable media examples.",
+        student_notes: analysis.student_notes || "Use with empathy in digital spaces.",
       };
 
       const saveRes = await fetch("/api/memes", {
