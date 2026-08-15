@@ -1,0 +1,77 @@
+import { NextRequest, NextResponse } from "next/server";
+import { INITIAL_USERS, UserProfile } from "@/lib/data/mock-data";
+import { supabaseAdmin } from "@/lib/supabase/server";
+
+let usersStore: UserProfile[] = [...INITIAL_USERS];
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get("email");
+  const username = searchParams.get("username");
+  const id = searchParams.get("id");
+
+  if (id) {
+    const user = usersStore.find((u) => u.id === id);
+    return NextResponse.json({ success: true, data: user || null });
+  }
+
+  if (email) {
+    const user = usersStore.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    return NextResponse.json({ success: true, data: user || null });
+  }
+
+  if (username) {
+    const user = usersStore.find((u) => u.username.toLowerCase() === username.toLowerCase());
+    return NextResponse.json({ success: true, data: user || null });
+  }
+
+  return NextResponse.json({ success: true, data: usersStore });
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { action, profile } = body;
+
+    if (action === "sync_user" && profile) {
+      const existingIdx = usersStore.findIndex(
+        (u) => u.id === profile.id || u.email.toLowerCase() === profile.email.toLowerCase()
+      );
+
+      if (existingIdx >= 0) {
+        usersStore[existingIdx] = {
+          ...usersStore[existingIdx],
+          ...profile,
+        };
+        return NextResponse.json({ success: true, data: usersStore[existingIdx] });
+      } else {
+        const newUser: UserProfile = {
+          id: profile.id || `u-${Date.now()}`,
+          username: profile.username.startsWith("@") ? profile.username : `@${profile.username}`,
+          display_name: profile.display_name || profile.username.replace("@", ""),
+          email: profile.email,
+          role: profile.role || "student",
+          avatar_url:
+            profile.avatar_url ||
+            (profile.role === "educator"
+              ? "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw"
+              : "https://lh3.googleusercontent.com/aida-public/AB6AXuDQG5761Gj_1MBYEKsKmG6v1l_xubjpj9-wE-L_U49q7dJp68cPrsiRYMTcguMQzVazkkZ3QTvf3_IL4xj7S4P28uti0ZlZ5FbKzLIGVQiDzEq_91prMzWLNu1LsluA4mtcFAf3xMoM7VVqIfT1bYEXSv89DnIcgjUdvkogngcj1SohZyr9VZqUxibTMxaAljSxN_AoXHG6BTL3K7dvupXfRiZvBaINxwz5fLz5_lyLvyjE5W98E3IYKw"),
+          is_active: true,
+          bio: profile.bio || (profile.role === "educator" ? "Educator & meme scholar." : "Student scholar."),
+          followers_count: profile.followers_count || 0,
+          following_count: profile.following_count || 0,
+          following_handles: profile.following_handles || [],
+          bookmarked_post_ids: [],
+          liked_post_ids: [],
+          created_at: new Date().toISOString(),
+        };
+        usersStore = [newUser, ...usersStore];
+        return NextResponse.json({ success: true, data: newUser });
+      }
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "u-admin-main",
+    "username": "@admin",
+    "display_name": "Super Admin",
+    "email": "admin@admin.admin",
+    "role": "admin",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCJnTEL7t8O_0vf0JSgEv4BnefcIoBxRj6srJ5dq71TVWwvNVmn94lh2dvrc64-W18HWQSI19OmhkaTCkn-dUVERt2u8lJqakIGuLqUQ41VZzzfzMCR5s9eS98NVLITrXngEuU1k4XFJlFSB9u965hFpw_FMejbEDD4Cd8YLSCiXNZNymA7j2exZxOPIptjBvbF7FRZsYX7Hw6sMW_NGSWpdt0tZfLRsj7_MJJUFIoXmmosfgKUtYZYAw",
+    "is_active": true,
+    "bio": "Head Administrator & Platform Director for Meme Community.",
+    "followers_count": 5000,
+    "following_count": 10,
+    "following_handles": [
+      "@philosopher_king",
+      "@anon_lurker"
+    ],
+    "bookmarked_post_ids": [],
+    "liked_post_ids": [],
+    "created_at": "2023-01-01"
+  },
+  {
+    "id": "u-1",
+    "username": "@philosopher_king",
+    "display_name": "Dr. Memeology",
+    "email": "teacher@memecommunity.edu",
+    "role": "educator",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw",
+    "is_active": true,
+    "bio": "Teaching cultural literacy through viral internet phenomena. High School AP Lit teacher.",
+    "followers_count": 1420,
+    "following_count": 12,
+    "following_handles": [
+      "@admin"
+    ],
+    "bookmarked_post_ids": [],
+    "liked_post_ids": [],
+    "created_at": "2024-01-15"
+  },
+  {
+    "id": "u-2",
+    "username": "@anon_lurker",
+    "display_name": "Alex",
+    "email": "student@memecommunity.edu",
+    "role": "student",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuDQG5761Gj_1MBYEKsKmG6v1l_xubjpj9-wE-L_U49q7dJp68cPrsiRYMTcguMQzVazkkZ3QTvf3_IL4xj7S4P28uti0ZlZ5FbKzLIGVQiDzEq_91prMzWLNu1LsluA4mtcFAf3xMoM7VVqIfT1bYEXSv89DnIcgjUdvkogngcj1SohZyr9VZqUxibTMxaAljSxN_AoXHG6BTL3K7dvupXfRiZvBaINxwz5fLz5_lyLvyjE5W98E3IYKw",
+    "is_active": true,
+    "bio": "Student exploring memes and STEM coursework.",
+    "followers_count": 85,
+    "following_count": 34,
+    "following_handles": [
+      "@philosopher_king"
+    ],
+    "bookmarked_post_ids": [],
+    "liked_post_ids": [],
+    "created_at": "2024-02-01"
+  }
+]

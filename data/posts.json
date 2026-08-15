@@ -1,0 +1,26 @@
+[
+  {
+    "id": "post-1786808761224",
+    "author_name": "Cool admin",
+    "author_handle": "@admin",
+    "author_avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCJnTEL7t8O_0vf0JSgEv4BnefcIoBxRj6srJ5dq71TVWwvNVmn94lh2dvrc64-W18HWQSI19OmhkaTCkn-dUVERt2u8lJqakIGuLqUQ41VZzzfzMCR5s9eS98NVLITrXngEuU1k4XFJlFSB9u965hFpw_FMejbEDD4Cd8YLSCiXNZNymA7j2exZxOPIptjBvbF7FRZsYX7Hw6sMW_NGSWpdt0tZfLRsj7_MJJUFIoXmmosfgKUtYZYAw",
+    "author_role": "admin",
+    "author_bio": "Student contributor.",
+    "author_followers": 10,
+    "is_following_author": false,
+    "is_verified": true,
+    "content": "test",
+    "category": "Culture",
+    "slang_tags": [],
+    "likes_count": 0,
+    "comments_count": 0,
+    "shares_count": 0,
+    "bookmarks_count": 1,
+    "created_at": "Just now",
+    "is_liked": false,
+    "is_bookmarked": true,
+    "is_reposted": false,
+    "is_pinned": false,
+    "comments": []
+  }
+]
