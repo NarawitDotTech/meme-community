@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MemeTrend, MemeReport } from "@/lib/data/mock-data";
-import { getTrends, saveTrends, getReports, saveReports } from "@/lib/data/storage";
+import { getTrendsAsync, saveTrendsAsync, getReportsAsync, saveReportsAsync } from "@/lib/data/storage";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type");
 
   if (type === "reports") {
-    return NextResponse.json({ success: true, data: getReports() });
+    const reports = await getReportsAsync();
+    return NextResponse.json({ success: true, data: reports });
   }
 
-  return NextResponse.json({ success: true, data: getTrends() });
+  const trends = await getTrendsAsync();
+  return NextResponse.json({ success: true, data: trends });
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action } = body;
-    let memes = getTrends();
-    let reports = getReports();
+    let memes = await getTrendsAsync();
+    let reports = await getReportsAsync();
 
     if (action === "suggest") {
       const { title, description, category, trend_status, image_url, origin, slang_terms, cultural_context, teacher_tips, student_notes } = body;
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
       };
 
       memes = [newTrend, ...memes];
-      saveTrends(memes);
+      await saveTrendsAsync(memes);
 
       // Add to admin review queue as a quality verification check
       const newReport: MemeReport = {
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
         created_at: "Just now",
       };
       reports = [newReport, ...reports];
-      saveReports(reports);
+      await saveReportsAsync(reports);
 
       return NextResponse.json({ success: true, data: newTrend });
     }
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
         return r;
       });
 
-      saveReports(reports);
+      await saveReportsAsync(reports);
       return NextResponse.json({ success: true, data: reports });
     }
 

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Post, MemeReport } from "@/lib/data/mock-data";
 import {
-  getPosts,
-  savePosts,
-  getBookmarks,
-  saveBookmarks,
-  getReports,
-  saveReports,
+  getPostsAsync,
+  savePostsAsync,
+  getBookmarksAsync,
+  saveBookmarksAsync,
+  getReportsAsync,
+  saveReportsAsync,
 } from "@/lib/data/storage";
 
 export async function GET(req: NextRequest) {
@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
   const userHandleParam = searchParams.get("user_handle");
   const authorHandle = searchParams.get("author");
 
-  let allPosts = getPosts();
-  let userBookmarks = getBookmarks();
+  let allPosts = await getPostsAsync();
+  let userBookmarks = await getBookmarksAsync();
   let filtered = [...allPosts];
 
   // Filter by author profile if requested
@@ -127,9 +127,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, userRole, userHandle } = body;
 
-    let posts = getPosts();
-    let userBookmarks = getBookmarks();
-    let reports = getReports();
+    let posts = await getPostsAsync();
+    let userBookmarks = await getBookmarksAsync();
+    let reports = await getReportsAsync();
 
     // 1. CREATE POST (Must be authenticated)
     if (action === "create") {
@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
       };
 
       posts = [newPost, ...posts];
-      savePosts(posts);
+      await savePostsAsync(posts);
       return NextResponse.json({ success: true, data: newPost });
     }
 
@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -269,7 +269,7 @@ export async function POST(req: NextRequest) {
       }
 
       posts = posts.filter((p) => p.id !== postId);
-      savePosts(posts);
+      await savePostsAsync(posts);
       return NextResponse.json({ success: true, message: "Post successfully deleted" });
     }
 
@@ -290,7 +290,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -312,7 +312,7 @@ export async function POST(req: NextRequest) {
       };
 
       reports = [newReport, ...reports];
-      saveReports(reports);
+      await saveReportsAsync(reports);
       return NextResponse.json({ success: true, data: newReport });
     }
 
@@ -331,7 +331,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -353,7 +353,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
 
       // Track user bookmark
       if (userHandle) {
@@ -364,7 +364,7 @@ export async function POST(req: NextRequest) {
         } else {
           userBookmarks[uHandle].push(postId);
         }
-        saveBookmarks(userBookmarks);
+        await saveBookmarksAsync(userBookmarks);
       }
 
       const updated = posts.find((p) => p.id === postId);
@@ -386,7 +386,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -420,7 +420,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -459,7 +459,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated, comment: newComment });
     }
@@ -485,7 +485,7 @@ export async function POST(req: NextRequest) {
         return p;
       });
 
-      savePosts(posts);
+      await savePostsAsync(posts);
       const updated = posts.find((p) => p.id === postId);
       return NextResponse.json({ success: true, data: updated });
     }

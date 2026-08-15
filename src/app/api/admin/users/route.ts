@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserProfile } from "@/lib/data/mock-data";
-import { getUsers, saveUsers } from "@/lib/data/storage";
+import { getUsersAsync, saveUsersAsync } from "@/lib/data/storage";
 
 export async function GET() {
-  const users = getUsers();
+  const users = await getUsersAsync();
   return NextResponse.json({ success: true, data: users });
 }
 
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action, userId, role, is_active } = body;
-    let users = getUsers();
+    let users = await getUsersAsync();
 
     if (action === "update-role") {
       users = users.map((u) => {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         return u;
       });
 
-      saveUsers(users);
+      await saveUsersAsync(users);
       const updated = users.find((u) => u.id === userId);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         return u;
       });
 
-      saveUsers(users);
+      await saveUsersAsync(users);
       const updated = users.find((u) => u.id === userId);
       return NextResponse.json({ success: true, data: updated });
     }

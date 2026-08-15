@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LearningVideo } from "@/lib/data/mock-data";
-import { getVideos, saveVideos } from "@/lib/data/storage";
+import { getVideosAsync, saveVideosAsync } from "@/lib/data/storage";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
   const search = searchParams.get("search");
 
-  let filtered = getVideos();
+  let filtered = await getVideosAsync();
 
   if (category && category !== "All Courses") {
     filtered = filtered.filter(
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action } = body;
-    let videos = getVideos();
+    let videos = await getVideosAsync();
 
     // 1. CREATE VIDEO
     if (action === "create") {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       };
 
       videos = [newVideo, ...videos];
-      saveVideos(videos);
+      await saveVideosAsync(videos);
       return NextResponse.json({ success: true, data: newVideo });
     }
 
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         return v;
       });
 
-      saveVideos(videos);
+      await saveVideosAsync(videos);
       const updated = videos.find((v) => v.id === id);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         return v;
       });
 
-      saveVideos(videos);
+      await saveVideosAsync(videos);
       const updated = videos.find((v) => v.id === id);
       return NextResponse.json({ success: true, data: updated });
     }
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
     if (action === "delete") {
       const { id } = body;
       videos = videos.filter((v) => v.id !== id);
-      saveVideos(videos);
+      await saveVideosAsync(videos);
       return NextResponse.json({ success: true, message: "Video deleted" });
     }
 

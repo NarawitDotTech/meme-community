@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserProfile } from "@/lib/data/mock-data";
-import { getUsers, saveUsers } from "@/lib/data/storage";
+import { getUsersAsync, saveUsersAsync } from "@/lib/data/storage";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const username = searchParams.get("username");
   const id = searchParams.get("id");
 
-  const users = getUsers();
+  const users = await getUsersAsync();
 
   if (id) {
     const user = users.find((u) => u.id === id);
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action, profile } = body;
-    let users = getUsers();
+    let users = await getUsersAsync();
 
     if (action === "sync_user" && profile) {
       const existingIdx = users.findIndex(
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
           ...users[existingIdx],
           ...profile,
         };
-        saveUsers(users);
+        await saveUsersAsync(users);
         return NextResponse.json({ success: true, data: users[existingIdx] });
       } else {
         const newUser: UserProfile = {
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
           created_at: new Date().toISOString(),
         };
         users = [newUser, ...users];
-        saveUsers(users);
+        await saveUsersAsync(users);
         return NextResponse.json({ success: true, data: newUser });
       }
     }
