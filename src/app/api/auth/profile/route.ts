@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserProfile } from "@/lib/data/mock-data";
 import { getUsers, saveUsers } from "@/lib/data/storage";
-import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
