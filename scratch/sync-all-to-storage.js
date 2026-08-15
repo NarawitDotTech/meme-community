@@ -1,243 +1,11 @@
-export interface PollOption {
-  id: string;
-  text: string;
-  votes: number;
-}
+const { createClient } = require('@supabase/supabase-js');
 
-export interface Poll {
-  id: string;
-  question: string;
-  options: PollOption[];
-  total_votes: number;
-  user_voted_option?: string;
-}
+const supabaseUrl = 'https://gegewgrpmqhnhutasjby.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZ2V3Z3JwbXFobmh1dGFzamJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njc4NjY2NiwiZXhwIjoyMTAyMzYyNjY2fQ.t1xUu_hWfiZ_Z_bQdzOQo9D_Zs10kTr38ab8mT9CEFk';
 
-export interface SlangBreakdownItem {
-  term: string;
-  definition: string;
-  for_teachers: string;
-}
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export interface CommentItem {
-  id: string;
-  post_id: string;
-  author_name: string;
-  author_handle: string;
-  author_avatar: string;
-  author_role?: "student" | "educator" | "admin";
-  content: string;
-  likes_count: number;
-  is_liked?: boolean;
-  created_at: string;
-}
-
-export interface Post {
-  id: string;
-  author_id?: string;
-  author_name: string;
-  author_handle: string;
-  author_avatar: string;
-  author_role: "student" | "educator" | "admin";
-  author_bio?: string;
-  author_followers?: number;
-  is_following_author?: boolean;
-  is_verified?: boolean;
-  content: string;
-  image_url?: string;
-  video_url?: string;
-  category?: string;
-  slang_tags?: string[];
-  slang_breakdown?: SlangBreakdownItem[];
-  poll?: Poll;
-  likes_count: number;
-  comments_count: number;
-  shares_count: number;
-  bookmarks_count: number;
-  created_at: string;
-  is_liked?: boolean;
-  is_bookmarked?: boolean;
-  is_reposted?: boolean;
-  is_pinned?: boolean;
-  comments?: CommentItem[];
-}
-
-export interface LearningVideo {
-  id: string;
-  title: string;
-  description: string;
-  category: "Foundations" | "Slang" | "Memes" | "Culture" | "Advanced" | "Classroom" | "Technology" | string;
-  level: "Beginner" | "Intermediate" | "Advanced";
-  duration: string;
-  module_code: string;
-  status: "published" | "draft";
-  views: string;
-  thumbnail_url: string;
-  video_url?: string;
-  instructor_name: string;
-  instructor_subscribers: string;
-  instructor_avatar: string;
-  curriculum?: string[];
-  created_at: string;
-}
-
-export interface MemeTrend {
-  id: string;
-  title: string;
-  category: string;
-  trend_status: "Trending Up" | "Peaking" | "Niche Rising" | "Peak Viral" | string;
-  image_url: string;
-  description: string;
-  origin?: string;
-  slang_terms?: string[];
-  cultural_context?: string;
-  teacher_tips?: string;
-  student_notes?: string;
-  source_url?: string;
-  is_ai_explained: boolean;
-  created_at: string;
-}
-
-export interface MemeReport {
-  id: string;
-  post_id?: string;
-  trend_name: string;
-  reported_by?: string;
-  reported_by_role?: string;
-  reason: string;
-  status: "pending" | "resolved" | "dismissed";
-  created_at: string;
-}
-
-export interface UserProfile {
-  id: string;
-  username: string;
-  display_name?: string;
-  email: string;
-  role: "student" | "educator" | "admin";
-  avatar_url: string;
-  is_active: boolean;
-  bio?: string;
-  followers_count: number;
-  following_count: number;
-  following_handles?: string[];
-  bookmarked_post_ids?: string[];
-  liked_post_ids?: string[];
-  created_at: string;
-}
-
-// Clean initial starter posts representing each role type
-export const INITIAL_POSTS: Post[] = [
-  {
-    id: "post-welcome-1",
-    author_id: "u-1",
-    author_name: "Dr. Memeology",
-    author_handle: "@philosopher_king",
-    author_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw",
-    author_role: "educator",
-    author_bio: "Professor of Digital Media & Memetic Philosophy. Bridging academic rigor and internet culture.",
-    author_followers: 1420,
-    is_following_author: false,
-    is_verified: true,
-    is_pinned: true,
-    content: "Welcome to Meme Community! 🎉\n\nThis platform connects students and educators through shared meme literacy. Feel free to post memes, vote on polls, and use the AI Slang Decoder to decode modern internet slang for classroom contexts.",
-    image_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCUgayW8eGcEd3NHbwVDlpECrSayVBvT-Pdpt9TvK7G1co-SDiYXyUXDVRbpknx0WlLx0HpTvkgpFeh_jqpvvUQwhyMSFFMMUB6SRL0rfWvTGK3jCiR_40n-_R1BELylLXllQA_1oWkN3defrhCUKnenMtp-aFufHV0BFoMKgWy6tXGjNM8ZYCBujml-NWY_HaPze2IOTblCf78qOp7awb58St1NLDNI-jxHZSvQYWNMJNsPVjIjXakKQ",
-    category: "Philosophy",
-    slang_tags: ["Welcome", "MemeTheory", "Classroom"],
-    slang_breakdown: [
-      {
-        term: "Meme Literacy",
-        definition: "The ability to critically understand, interpret, and contextualize viral internet formats.",
-        for_teachers: "Use as a tool for teaching satire, rhetoric, and media analysis."
-      }
-    ],
-    poll: {
-      id: "poll-welcome",
-      question: "Teachers: How often do you encounter slang in homework or class discussions?",
-      options: [
-        { id: "opt-1", text: "Every single day (Rizz, No Cap, Brainrot)", votes: 34 },
-        { id: "opt-2", text: "A few times a week", votes: 21 },
-        { id: "opt-3", text: "Rarely / Only in hallways", votes: 8 },
-        { id: "opt-4", text: "I speak fluent slang myself 😎", votes: 15 }
-      ],
-      total_votes: 78,
-    },
-    likes_count: 58,
-    comments_count: 1,
-    shares_count: 12,
-    bookmarks_count: 9,
-    created_at: "Just now",
-    is_liked: false,
-    is_bookmarked: false,
-    is_reposted: false,
-    comments: [
-      {
-        id: "c-welcome-1",
-        post_id: "post-welcome-1",
-        author_name: "Alex",
-        author_handle: "@anon_lurker",
-        author_role: "student",
-        author_avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQG5761Gj_1MBYEKsKmG6v1l_xubjpj9-wE-L_U49q7dJp68cPrsiRYMTcguMQzVazkkZ3QTvf3_IL4xj7S4P28uti0ZlZ5FbKzLIGVQiDzEq_91prMzWLNu1LsluA4mtcFAf3xMoM7VVqIfT1bYEXSv89DnIcgjUdvkogngcj1SohZyr9VZqUxibTMxaAljSxN_AoXHG6BTL3K7dvupXfRiZvBaINxwz5fLz5_lyLvyjE5W98E3IYKw",
-        content: "Excited to share our study group memes here!",
-        likes_count: 4,
-        is_liked: false,
-        created_at: "Just now"
-      }
-    ]
-  }
-];
-
-export const INITIAL_USERS: UserProfile[] = [
-  {
-    id: "u-admin-main",
-    username: "@admin",
-    display_name: "Super Admin",
-    email: "admin@admin.admin",
-    role: "admin",
-    avatar_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCJnTEL7t8O_0vf0JSgEv4BnefcIoBxRj6srJ5dq71TVWwvNVmn94lh2dvrc64-W18HWQSI19OmhkaTCkn-dUVERt2u8lJqakIGuLqUQ41VZzzfzMCR5s9eS98NVLITrXngEuU1k4XFJlFSB9u965hFpw_FMejbEDD4Cd8YLSCiXNZNymA7j2exZxOPIptjBvbF7FRZsYX7Hw6sMW_NGSWpdt0tZfLRsj7_MJJUFIoXmmosfgKUtYZYAw",
-    is_active: true,
-    bio: "Head Administrator & Platform Director for Meme Community.",
-    followers_count: 5000,
-    following_count: 10,
-    following_handles: ["@philosopher_king", "@anon_lurker"],
-    bookmarked_post_ids: [],
-    liked_post_ids: [],
-    created_at: "2023-01-01"
-  },
-  {
-    id: "u-1",
-    username: "@philosopher_king",
-    display_name: "Dr. Memeology",
-    email: "teacher@memecommunity.edu",
-    role: "educator",
-    avatar_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCsOB1PHfFe7Ii08nY5KY258LkIJpo5gcfO7WaPYR9NEpQVNFJmdgFVBMtgCxljCyw3X08ktMVsMT9DUkBGv6kse-zg1d1OG0EgVE0OjkKqX8YeHcSIQ295cnK0-JBfAH6BgSPlTTNE1uVaXywZ-BFPBbLi7D29kR-_8aapRHQvBewmr__qJrs2qWmMNLNi6JVXQAFEISJyhHFw2V-L_29MYJ8Xl_KTxCywaToBQPI6NWdGZRJIQlbpvw",
-    is_active: true,
-    bio: "Teaching cultural literacy through viral internet phenomena. High School AP Lit teacher.",
-    followers_count: 1420,
-    following_count: 12,
-    following_handles: ["@admin"],
-    bookmarked_post_ids: [],
-    liked_post_ids: [],
-    created_at: "2024-01-15"
-  },
-  {
-    id: "u-2",
-    username: "@anon_lurker",
-    display_name: "Alex",
-    email: "student@memecommunity.edu",
-    role: "student",
-    avatar_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQG5761Gj_1MBYEKsKmG6v1l_xubjpj9-wE-L_U49q7dJp68cPrsiRYMTcguMQzVazkkZ3QTvf3_IL4xj7S4P28uti0ZlZ5FbKzLIGVQiDzEq_91prMzWLNu1LsluA4mtcFAf3xMoM7VVqIfT1bYEXSv89DnIcgjUdvkogngcj1SohZyr9VZqUxibTMxaAljSxN_AoXHG6BTL3K7dvupXfRiZvBaINxwz5fLz5_lyLvyjE5W98E3IYKw",
-    is_active: true,
-    bio: "Student exploring memes and STEM coursework.",
-    followers_count: 85,
-    following_count: 34,
-    following_handles: ["@philosopher_king"],
-    bookmarked_post_ids: [],
-    liked_post_ids: [],
-    created_at: "2024-02-01"
-  }
-];
-
-export const INITIAL_VIDEOS: LearningVideo[] = [
+const ALL_VIDEOS = [
   {
     id: "vid-1",
     title: "CTRL + LOL: Using memes to teach and reach your learners",
@@ -682,7 +450,7 @@ export const INITIAL_VIDEOS: LearningVideo[] = [
   }
 ];
 
-export const INITIAL_MEME_TRENDS: MemeTrend[] = [
+const ALL_TRENDS = [
   {
     id: "trend-chill-guy",
     title: "Chill Guy",
@@ -760,14 +528,20 @@ export const INITIAL_MEME_TRENDS: MemeTrend[] = [
   }
 ];
 
-export const INITIAL_MEME_REPORTS: MemeReport[] = [
-  {
-    id: "rep-1",
-    trend_name: "Post ID: #post-welcome-1",
-    reason: "Quality Check for School Safety",
-    reported_by: "@anon_lurker",
-    reported_by_role: "student",
-    status: "pending",
-    created_at: "2h ago"
-  }
-];
+async function syncAll() {
+  const vRes = await supabase.storage.from('app-data').upload('videos.json', Buffer.from(JSON.stringify(ALL_VIDEOS, null, 2)), {
+    upsert: true,
+    contentType: 'application/json',
+    cacheControl: '0'
+  });
+  console.log('Synced 20 Videos to Supabase Storage:', { path: vRes.data?.path, error: vRes.error });
+
+  const tRes = await supabase.storage.from('app-data').upload('trends.json', Buffer.from(JSON.stringify(ALL_TRENDS, null, 2)), {
+    upsert: true,
+    contentType: 'application/json',
+    cacheControl: '0'
+  });
+  console.log('Synced Latest Trends to Supabase Storage:', { path: tRes.data?.path, error: tRes.error });
+}
+
+syncAll();
