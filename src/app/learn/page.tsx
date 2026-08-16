@@ -56,6 +56,18 @@ export default function LearningCenterPage() {
 
   useEffect(() => {
     fetchVideos();
+
+    const interval = setInterval(() => {
+      fetchVideos();
+    }, 10000);
+
+    const handleFocus = () => fetchVideos();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [activeCategory, searchQuery]);
 
   const canManageVideos = user?.role === "educator" || user?.role === "admin";

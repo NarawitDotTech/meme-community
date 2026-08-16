@@ -42,6 +42,18 @@ export default function MemeTrackerPage() {
 
   useEffect(() => {
     fetchTrends();
+
+    const interval = setInterval(() => {
+      fetchTrends();
+    }, 10000);
+
+    const handleFocus = () => fetchTrends();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   return (

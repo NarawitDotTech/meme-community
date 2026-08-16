@@ -90,7 +90,20 @@ export default function HomeFeedPage() {
 
     const handleUpdate = () => fetchPosts();
     window.addEventListener("posts-updated", handleUpdate);
-    return () => window.removeEventListener("posts-updated", handleUpdate);
+
+    // Real-time multi-device sync: poll every 8 seconds and on window focus
+    const interval = setInterval(() => {
+      fetchPosts();
+    }, 8000);
+
+    const handleFocus = () => fetchPosts();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("posts-updated", handleUpdate);
+      window.removeEventListener("focus", handleFocus);
+      clearInterval(interval);
+    };
   }, [activeTab, activeCategory, searchQuery, user?.following_handles, user?.bookmarked_post_ids, user?.username]);
 
   const handleOpenAuthorProfile = (handle: string) => {
